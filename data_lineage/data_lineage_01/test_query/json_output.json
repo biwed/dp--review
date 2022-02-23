@@ -1,0 +1,7 @@
+{
+    "pg_time": "2022-02-23 13:06:39.266",
+    "timezone": "UTC",
+    "thread": "78",
+    "duration_time": "0.324 ms",
+    "query_plain": "\n\t{\n\t  \"Query Text\": \"select count(*) from somet AS t where t.number in( 1000, 11000, 120)\",\n\t  \"Plan\": {\n\t    \"Node Type\": \"Aggregate\",\n\t    \"Strategy\": \"Plain\",\n\t    \"Partial Mode\": \"Simple\",\n\t    \"Parallel Aware\": false,\n\t    \"Async Capable\": false,\n\t    \"Startup Cost\": 24.06,\n\t    \"Total Cost\": 24.07,\n\t    \"Plan Rows\": 1,\n\t    \"Plan Width\": 8,\n\t    \"Output\": [\"count(*)\"],\n\t    \"Plans\": [\n\t      {\n\t        \"Node Type\": \"Seq Scan\",\n\t        \"Parent Relationship\": \"Outer\",\n\t        \"Parallel Aware\": false,\n\t        \"Async Capable\": false,\n\t        \"Relation Name\": \"somet\",\n\t        \"Schema\": \"public\",\n\t        \"Alias\": \"t\",\n\t        \"Startup Cost\": 0.00,\n\t        \"Total Cost\": 24.02,\n\t        \"Plan Rows\": 15,\n\t        \"Plan Width\": 0,\n\t        \"Output\": [\"id\", \"number\", \"text\"],\n\t        \"Filter\": \"(t.number = ANY ('{1000,11000,120}'::integer[]))\"\n\t      }\n\t    ]\n\t  }\n\t}"
+}

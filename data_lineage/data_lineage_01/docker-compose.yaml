@@ -1,0 +1,66 @@
+version: '3.7'
+services:
+    source_db:
+        image: postgres:14
+        environment: 
+          - POSTGRES_USER=${DB_USER}
+          - POSTGRES_PASSWORD=${DB_PASS}
+          - POSTGRES_DB=source_db
+        ports:
+          - '6432:5432'
+        command:
+          - "postgres"
+          - "-c"
+          - "logging_collector=on"
+          - "-c"
+          - "shared_preload_libraries=auto_explain"
+          - "-c"
+          - "auto_explain.log_min_duration=0"
+          - "-c"
+          - "auto_explain.log_format=JSON"
+          - "-c"
+          - "auto_explain.log_verbose=true"
+          - "-c"
+          - "log_directory=/var/log/postgresql"
+        volumes:
+          - logs:/var/log/postgresql
+          - ./pg_sql/:/docker-entrypoint-initdb.d
+    fluentd:
+        image: fluentd/fluentd_kafka:1.14-debian-1
+        build:
+            context: fluentd
+        volumes:
+          - logs:/pg_log/:ro
+          - ./fluentd/fluent.conf:/fluentd/etc/fluent.conf
+        depends_on:
+            - source_db
+    kafdrop:
+      image: obsidiandynamics/kafdrop
+      container_name: biwed_stat_kafka
+      restart: "no"
+      ports:
+        - "9090:9000"
+      environment:
+        KAFKA_BROKERCONNECT: "kafka:29092"
+        JVM_OPTS: "-Xms16M -Xmx48M -Xss180K -XX:-TieredCompilation -XX:+UseStringDeduplication -noverify"
+      depends_on:
+        - "kafka"
+    kafka:
+      image: obsidiandynamics/kafka
+      container_name: biwed_lab_kafka
+      restart: "no"
+      ports:
+        - "2181:2181"
+        - "9092:9092"
+      environment:
+        KAFKA_LISTENERS: "INTERNAL://:29092,EXTERNAL://:9092"
+        KAFKA_ADVERTISED_LISTENERS: "INTERNAL://kafka:29092,EXTERNAL://localhost:9092"
+        KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT"
+        KAFKA_INTER_BROKER_LISTENER_NAME: "INTERNAL"
+        KAFKA_ZOOKEEPER_SESSION_TIMEOUT: "6000"
+        KAFKA_RESTART_ATTEMPTS: "10"
+        KAFKA_RESTART_DELAY: "5"
+        ZOOKEEPER_AUTOPURGE_PURGE_INTERVAL: "0"
+
+volumes:
+    logs:
