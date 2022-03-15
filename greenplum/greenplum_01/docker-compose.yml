@@ -1,0 +1,26 @@
+version: "3.7"
+
+services:
+    gpdb:
+        image: biwed/gp-pxf:6.11.1
+        ports:
+            - "5432-5532:5432"
+        volumes:
+            - "./conf/pxf:/usr/local/greenplum-db/pxf/pxf-conf/servers/default"
+            - gp_data:/data1
+        environment:
+            GP_DB: greenplum
+            GP_USER: test
+            GP_PASSWORD: test
+    minio:
+        image: minio/minio:RELEASE.2022-03-08T22-28-51Z
+        command: server /data --console-address ":9001"
+        ports:
+            - "9000:9000"
+            - "9001:9001"
+        environment:
+            MINIO_ROOT_USER: minio
+            MINIO_ROOT_PASSWORD: minio123
+
+volumes:
+  gp_data:
